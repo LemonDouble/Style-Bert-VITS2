@@ -24,9 +24,8 @@ from transformers import (
     PreTrainedTokenizerFast,
 )
 
-from style_bert_vits2.constants import DEFAULT_BERT_MODEL_PATHS, Languages
+from style_bert_vits2.constants import BERT_REPO_IDS, DEFAULT_BERT_MODEL_PATHS, Languages
 from style_bert_vits2.logging import logger
-from style_bert_vits2.nlp import onnx_bert_models
 
 
 if TYPE_CHECKING:
@@ -83,11 +82,18 @@ def load_model(
     if language in __loaded_models:
         return __loaded_models[language]
 
-    # pretrained_model_name_or_path が指定されていない場合はデフォルトのパスを利用
+    # pretrained_model_name_or_path が指定されていない場合
+    # ローカルにモデルファイルがあればそれを使い、なければ HuggingFace Hub から自動ダウンロード
     if pretrained_model_name_or_path is None:
-        assert DEFAULT_BERT_MODEL_PATHS[language].exists(), \
-            f"The default {language.name} BERT model does not exist on the file system. Please specify the path to the pre-trained model."  # fmt: skip
-        pretrained_model_name_or_path = str(DEFAULT_BERT_MODEL_PATHS[language])
+        local_path = DEFAULT_BERT_MODEL_PATHS[language]
+        has_local_model = local_path.exists() and (
+            (local_path / "model.safetensors").exists()
+            or (local_path / "pytorch_model.bin").exists()
+        )
+        if has_local_model:
+            pretrained_model_name_or_path = str(local_path)
+        else:
+            pretrained_model_name_or_path = BERT_REPO_IDS[language]
 
     # BERT モデルをロードし、辞書に格納して返す
     ## 英語のみ DebertaV2Model でロードする必要がある
@@ -100,6 +106,7 @@ def load_model(
                 device_map=device_map,
                 cache_dir=cache_dir,
                 revision=revision,
+                dtype="float32",
             ),
         )
     else:
@@ -108,6 +115,7 @@ def load_model(
             device_map=device_map,
             cache_dir=cache_dir,
             revision=revision,
+            dtype="float32",
         )
     logger.info(
         f"Loaded the {language.name} BERT model from {pretrained_model_name_or_path} ({time.time() - start_time:.2f}s)"
@@ -149,16 +157,18 @@ def load_tokenizer(
     if language in __loaded_tokenizers:
         return __loaded_tokenizers[language]
 
-    # pretrained_model_name_or_path が指定されていない場合はデフォルトのパスを利用
+    # pretrained_model_name_or_path が指定されていない場合
+    # ローカルにトークナイザーがあればそれを使い、なければ HuggingFace Hub から自動ダウンロード
     if pretrained_model_name_or_path is None:
-        # ライブラリ利用時、特例的にこの状況で ONNX 版 BERT トークナイザーがロードされている場合はそのまま返す
-        ## ONNX 版 BERT トークナイザー単独で g2p 処理を行うために必要 (各言語の g2p.py はこの関数に依存している)
-        ## 設計的には微妙だがこの方が差異を吸収できて手っ取り早い
-        if DEFAULT_BERT_MODEL_PATHS[language].exists() is False and onnx_bert_models.is_tokenizer_loaded(language):  # fmt: skip
-            return onnx_bert_models.load_tokenizer(language)
-        assert DEFAULT_BERT_MODEL_PATHS[language].exists(), \
-            f"The default {language.name} BERT tokenizer does not exist on the file system. Please specify the path to the pre-trained model."  # fmt: skip
-        pretrained_model_name_or_path = str(DEFAULT_BERT_MODEL_PATHS[language])
+        local_path = DEFAULT_BERT_MODEL_PATHS[language]
+        has_local_tokenizer = local_path.exists() and (
+            (local_path / "tokenizer.json").exists()
+            or (local_path / "tokenizer_config.json").exists()
+        )
+        if has_local_tokenizer:
+            pretrained_model_name_or_path = str(local_path)
+        else:
+            pretrained_model_name_or_path = BERT_REPO_IDS[language]
 
     # BERT トークナイザーをロードし、辞書に格納して返す
     ## 英語のみ DebertaV2TokenizerFast でロードする必要がある

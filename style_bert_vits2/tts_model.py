@@ -7,7 +7,6 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Optional, Union
 
 import numpy as np
-import onnxruntime
 from numpy.typing import NDArray
 from pydantic import BaseModel, Field
 

@@ -1,9 +1,6 @@
 from __future__ import annotations
 
-from collections.abc import Sequence
-from typing import TYPE_CHECKING, Any, Optional, Union
-
-from numpy.typing import NDArray
+from typing import TYPE_CHECKING, Optional
 
 from style_bert_vits2.constants import Languages
 from style_bert_vits2.nlp.symbols import (
@@ -49,53 +46,10 @@ def extract_bert_feature(
         from style_bert_vits2.nlp.japanese.bert_feature import extract_bert_feature
     elif language == Languages.EN:
         from style_bert_vits2.nlp.english.bert_feature import extract_bert_feature
-    elif language == Languages.ZH:
-        from style_bert_vits2.nlp.chinese.bert_feature import extract_bert_feature
     else:
         raise ValueError(f"Language {language} not supported")
 
     return extract_bert_feature(text, word2ph, device, assist_text, assist_text_weight)
-
-
-def extract_bert_feature_onnx(
-    text: str,
-    word2ph: list[int],
-    language: Languages,
-    onnx_providers: Sequence[Union[str, tuple[str, dict[str, Any]]]],
-    assist_text: Optional[str] = None,
-    assist_text_weight: float = 0.7,
-) -> NDArray[Any]:
-    """
-    テキストから BERT の特徴量を抽出する (ONNX 推論)
-
-    Args:
-        text (str): テキスト
-        word2ph (list[int]): 元のテキストの各文字に音素が何個割り当てられるかを表すリスト
-        language (Languages): テキストの言語
-        onnx_providers (list[str]): ONNX 推論で利用する ExecutionProvider (CPUExecutionProvider, CUDAExecutionProvider など)
-        assist_text (Optional[str], optional): 補助テキスト (デフォルト: None)
-        assist_text_weight (float, optional): 補助テキストの重み (デフォルト: 0.7)
-
-    Returns:
-        NDArray[Any]: BERT の特徴量
-    """
-
-    if language == Languages.JP:
-        from style_bert_vits2.nlp.japanese.bert_feature import extract_bert_feature_onnx
-    elif language == Languages.EN:
-        from style_bert_vits2.nlp.english.bert_feature import extract_bert_feature_onnx
-    elif language == Languages.ZH:
-        from style_bert_vits2.nlp.chinese.bert_feature import extract_bert_feature_onnx
-    else:
-        raise ValueError(f"Language {language} not supported")
-
-    return extract_bert_feature_onnx(
-        text,
-        word2ph,
-        onnx_providers,
-        assist_text,
-        assist_text_weight,
-    )
 
 
 def clean_text(
@@ -127,12 +81,6 @@ def clean_text(
     elif language == Languages.EN:
         from style_bert_vits2.nlp.english.g2p import g2p
         from style_bert_vits2.nlp.english.normalizer import normalize_text
-
-        norm_text = normalize_text(text)
-        phones, tones, word2ph = g2p(norm_text)
-    elif language == Languages.ZH:
-        from style_bert_vits2.nlp.chinese.g2p import g2p
-        from style_bert_vits2.nlp.chinese.normalizer import normalize_text
 
         norm_text = normalize_text(text)
         phones, tones, word2ph = g2p(norm_text)
