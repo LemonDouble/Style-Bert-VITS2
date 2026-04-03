@@ -1,47 +1,17 @@
 __pycache__/
-venv/
 .venv/
 dist/
-.coverage*
-.ipynb_checkpoints/
-.ruff_cache/
-.DS_Store
-._*
+*.egg-info/
 
-/*.yml
-!/default_config.yml
+# Model weights (auto-downloaded or user-provided)
 /bert/*/*.bin
-/bert/*/*.h5
-/bert/*/*.model
 /bert/*/*.safetensors
-/bert/*/*.msgpack
-/bert/*/*.onnx
-
-/configs/paths.yml
-
-/pretrained/*.safetensors
-/pretrained/*.pth
-
-/pretrained_jp_extra/*.safetensors
-/pretrained_jp_extra/*.pth
-
 /slm/*/*.bin
+/model_assets/
 
-/scripts/test/
-/scripts/lib/
-/scripts/Style-Bert-VITS2/
-/scripts/sbv2/
-*.zip
-*.csv
-*.bak
-/mos_results/
+# uv
+uv.lock
 
-safetensors.ipynb
-*.wav
-/static/
-
-# pyopenjtalk's dictionary
+# misc
+.DS_Store
 *.dic
-
-playground.ipynb
-playgrounds/
