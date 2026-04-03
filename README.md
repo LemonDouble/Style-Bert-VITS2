@@ -6,10 +6,9 @@
 
 ## 목표
 
-1. **라이브러리화** — weight만 준비하면 `import`해서 바로 추론 가능한 패키지
-2. **데이터셋 구축 파이프라인** — 영상+자막 → 학습 가능한 데이터셋
-3. **API 서버** — 학습된 모델을 쉽게 서빙할 수 있는 추론 API
-4. **한국어 확장** — 이중 모델 방식으로 한국어 TTS 지원 (추후)
+1. **라이브러리화** — `pip install` + fine-tuned 모델만 준비하면 바로 추론 가능
+2. **API 서버** — 학습된 모델을 쉽게 서빙
+3. **한국어 확장** — 이중 모델 방식으로 한국어 TTS 지원 (추후)
 
 ## 아키텍처 결정
 
@@ -20,15 +19,26 @@
   - JP 모델을 건드리지 않고 독립적으로 학습/최적화
   - 언어별 라우팅으로 전환
 
-## 사용법 (목표 API)
+## 추론
+
+### 설치
+
+```bash
+pip install style-bert-vits2
+```
+
+BERT, WavLM, pretrained 등 공유 리소스는 패키지가 자동으로 다운로드합니다.
+유저는 **fine-tuned 모델(safetensors)만** 준비하면 됩니다.
+
+### 기본 사용법
 
 ```python
 from style_bert_vits2 import TTS, Lang
 
-# 공유 리소스(BERT, WavLM) 1회 로드
+# 공유 리소스 자동 다운로드 + 메모리 로드
 tts = TTS(device="cuda")
 
-# Speaker는 자기 가중치(safetensors)만 로드
+# Speaker는 fine-tuned 가중치(safetensors)만 로드
 elaina = tts.load("elaina", "./models/Elaina")
 
 # 기본 사용
@@ -50,49 +60,38 @@ audio = elaina.generate(
 )
 ```
 
-## 메모리 구조
+### Docker / 서버 환경
+
+```dockerfile
+# 빌드 시점 — 이미지에 가중치 포함 (GPU 불필요)
+RUN python -c "from style_bert_vits2 import TTS; TTS.prepare()"
+
+# 실행 시점 — 다운로드 없이 바로 서빙
+CMD ["python", "server.py"]
+```
+
+```python
+# prepare() — 가중치 다운로드만 (GPU 불필요, CI/빌드 단계용)
+TTS.prepare()
+
+# TTS() — 다운로드 + 메모리 로드 (이미 다운로드 되어있으면 로드만)
+tts = TTS(device="cuda")
+```
+
+| 메서드 | 다운로드 | 메모리 로드 | GPU 필요 | 용도 |
+|--------|----------|-------------|----------|------|
+| `TTS.prepare()` | O | X | X | Docker 빌드, CI |
+| `TTS(device=...)` | O (없으면) | O | O | 추론 |
+
+### 메모리 구조
 
 ```
-TTS (공유 리소스 관리)
-├── bert_jp: DeBERTa JP     ← 공유 (~1.3GB)
-├── wavlm: WavLM            ← 공유 (~360MB)
+TTS (공유 리소스 — 자동 관리)
+├── bert_jp: DeBERTa JP     ← 자동 다운로드 (~1.3GB)
+├── wavlm: WavLM            ← 자동 다운로드 (~360MB)
 │
-├── speakers["elaina"]  → Generator 가중치만 (~240MB)
-└── speakers["plana"]  → Generator 가중치만 (~240MB)
-```
-
-## 데이터셋 파이프라인
-
-```
-영상 + 자막 (.ass/.srt)
-  → 1. 자막 타이밍 기반 음성 추출 (ffmpeg)
-  → 2. UVR 배경음악 제거 (MDX23C-InstVoc HQ)
-  → 3. 수동 QC (노이즈, 다른 캐릭터 대사 삭제)
-  → 4. 리샘플링 (44.1kHz)
-  → 5. 라벨 생성 (esd.list)
-  → 6. 전처리 (BERT 피처 추출 등)
-  → 학습 준비 완료
-```
-
-## 프로젝트 구조
-
-```
-Style-Bert-VITS2/
-├── style_bert_vits2/           ← 핵심 패키지
-│   ├── models/                 — 모델 정의 (models_jp_extra.py)
-│   ├── nlp/                    — 언어별 NLP (G2P, BERT, 음소)
-│   │   ├── japanese/
-│   │   ├── english/
-│   │   └── chinese/
-│   └── constants.py
-├── bert/                       ← BERT 모델 가중치 (gitignore)
-│   └── deberta-v2-large-japanese-char-wwm/
-├── slm/                        ← WavLM 가중치 (gitignore)
-├── pretrained_jp_extra/        ← JP-Extra pretrained (gitignore)
-├── model_assets/               ← fine-tuned 모델 (gitignore)
-│   └── Elaina/
-├── Data/                       ← 학습 데이터 (gitignore)
-└── configs/
+├── speakers["elaina"]  → fine-tuned 가중치만 (~240MB, 유저 제공)
+└── speakers["plana"]  → fine-tuned 가중치만 (~240MB, 유저 제공)
 ```
 
 ## 라이선스
