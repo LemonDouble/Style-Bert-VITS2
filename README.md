@@ -70,7 +70,7 @@ TTS (공유 리소스 — 자동 관리)
 ├── wavlm: WavLM            ← 자동 다운로드 (~360MB)
 │
 ├── speakers["elaina"]  → fine-tuned 가중치만 (~240MB, 유저 제공)
-└── speakers["plana"]  → fine-tuned 가중치만 (~240MB, 유저 제공)
+└── speakers["plana"]   → fine-tuned 가중치만 (~240MB, 유저 제공)
 ```
 
 ## 영어→카타카나 변환

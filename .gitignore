@@ -12,9 +12,10 @@ dist/
 # uv
 uv.lock
 
-# Benchmark outputs
-/benchmark_results/*.wav
-/benchmark_results/results.json
+# Benchmark outputs (keep directory structure, ignore generated files)
+/dev_tools/benchmark_results/**/*.wav
+/dev_tools/benchmark_results/**/*.json
+/dev_tools/benchmark_results/**/*.html
 
 # Test samples
 /test_samples/
