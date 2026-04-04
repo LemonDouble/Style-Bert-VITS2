@@ -1,51 +1,38 @@
 # Style-Bert-VITS2 (Fork)
 
-[Style-Bert-VITS2](https://github.com/litagin02/Style-Bert-VITS2)를 기반으로 한 커스텀 TTS 패키지.
+[Style-Bert-VITS2](https://github.com/litagin02/Style-Bert-VITS2)를 기반으로 한 일본어 TTS 라이브러리.
 
 > 원본 Style-Bert-VITS2는 [litagin02/Style-Bert-VITS2](https://github.com/litagin02/Style-Bert-VITS2)를 참고하세요. 라이선스: AGPL-3.0
 
-## 목표
+## 특징
 
-1. **라이브러리화** — `pip install` + fine-tuned 모델만 준비하면 바로 추론 가능
-2. **API 서버** — 학습된 모델을 쉽게 서빙
-3. **한국어 확장** — 이중 모델 방식으로 한국어 TTS 지원 (추후)
+- **라이브러리화** — `pip install` + fine-tuned 모델만 준비하면 바로 추론 가능
+- **JP-Extra 모델** — Style-Bert-VITS2 JP-Extra (v2.7.0), DeBERTa JP + WavLM
+- **영어→카타카나 자동 변환** — 22만 엔트리 외래어 사전 룩업 (의존성 없음)
 
-## 아키텍처 결정
-
-- **JP 모델**: Style-Bert-VITS2 JP-Extra (v2.7.0) 사용
-  - 단일 BERT (DeBERTa JP), WavLM discriminator
-  - 기존 pretrained 모델 그대로 활용
-- **KO 모델**: 이중 모델 방식 — JP 모델과 별도로 한국어 전용 모델 운영 (예정)
-  - JP 모델을 건드리지 않고 독립적으로 학습/최적화
-  - 언어별 라우팅으로 전환
-
-## 추론
-
-### 설치
+## 설치
 
 ```bash
 pip install style-bert-vits2
 ```
 
-BERT, WavLM, pretrained 등 공유 리소스는 패키지가 자동으로 다운로드합니다.
-유저는 **fine-tuned 모델(safetensors)만** 준비하면 됩니다.
+BERT, WavLM 등 공유 리소스는 자동 다운로드됩니다. **fine-tuned 모델(safetensors)만** 준비하세요.
 
-### 기본 사용법
+## 사용법
 
 ```python
 from style_bert_vits2 import TTS, Lang
 
-# 공유 리소스 자동 다운로드 + 메모리 로드
 tts = TTS(device="cuda")
-
-# Speaker는 fine-tuned 가중치(safetensors)만 로드
 elaina = tts.load("elaina", "./models/Elaina")
 
-# 기본 사용
 audio = elaina.generate("先生、大丈夫ですか？", lang=Lang.JA, style=elaina.styles.Neutral)
 audio.save("output.wav")
+```
 
-# 파라미터 조절
+파라미터 조절:
+
+```python
 audio = elaina.generate(
     "先生、今日も頑張りましょう！",
     lang=Lang.JA,
@@ -70,14 +57,6 @@ RUN python -c "from style_bert_vits2 import TTS; TTS.prepare()"
 CMD ["python", "server.py"]
 ```
 
-```python
-# prepare() — 가중치 다운로드만 (GPU 불필요, CI/빌드 단계용)
-TTS.prepare()
-
-# TTS() — 다운로드 + 메모리 로드 (이미 다운로드 되어있으면 로드만)
-tts = TTS(device="cuda")
-```
-
 | 메서드 | 다운로드 | 메모리 로드 | GPU 필요 | 용도 |
 |--------|----------|-------------|----------|------|
 | `TTS.prepare()` | O | X | X | Docker 빌드, CI |
@@ -98,11 +77,9 @@ TTS (공유 리소스 — 자동 관리)
 
 일본어 텍스트에 포함된 영어 단어를 자동으로 카타카나 외래어로 변환합니다.
 
-- 22만 엔트리의 외래어 사전 룩업 (의존성 없음, 순수 dict)
 - `hello` → `ハロー`, `computer` → `コンピュータ`, `meeting` → `ミーティング`
 - 사전에 없는 단어는 기존 동작 유지 (pyopenjtalk 처리)
 - 데이터 출처: [loanwords_gairaigo](https://github.com/jamesohortle/loanwords_gairaigo) (GPL-3.0)
-  - JMdict, CMUdict, Wikipedia, Wiktionary, Britfone, JTCA, LREC'14 기반
 
 ## 라이선스
 
