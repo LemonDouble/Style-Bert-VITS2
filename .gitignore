@@ -12,6 +12,13 @@ dist/
 # uv
 uv.lock
 
+# Benchmark outputs
+/benchmark_results/*.wav
+/benchmark_results/results.json
+
+# Test samples
+/test_samples/
+
 # misc
 .DS_Store
 *.dic

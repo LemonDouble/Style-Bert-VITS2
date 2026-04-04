@@ -51,7 +51,7 @@ def extract_bert_feature(
         for i in inputs:
             inputs[i] = inputs[i].to(device)  # type: ignore
         res = model(**inputs, output_hidden_states=True)
-        res = torch.cat(res["hidden_states"][-3:-2], -1)[0].cpu()
+        res = torch.cat(res["hidden_states"][-3:-2], -1)[0].cpu().float()
         if assist_text:
             style_inputs = tokenizer(assist_text, return_tensors="pt")
             for i in style_inputs:
