@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Optional
 
-from style_bert_vits2.constants import Languages
 from style_bert_vits2.nlp import bert_models
 from style_bert_vits2.nlp.japanese.g2p import text_to_sep_kata
 
@@ -42,12 +41,12 @@ def extract_bert_feature(
 
     if device == "cuda" and not torch.cuda.is_available():
         device = "cpu"
-    model = bert_models.load_model(Languages.JP, device_map=device)
-    bert_models.transfer_model(Languages.JP, device)
+    model = bert_models.load_model(device_map=device)
+    bert_models.transfer_model(device)
 
     style_res_mean = None
     with torch.no_grad():
-        tokenizer = bert_models.load_tokenizer(Languages.JP)
+        tokenizer = bert_models.load_tokenizer()
         inputs = tokenizer(text, return_tensors="pt")
         for i in inputs:
             inputs[i] = inputs[i].to(device)  # type: ignore

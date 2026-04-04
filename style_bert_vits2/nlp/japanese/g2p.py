@@ -1,7 +1,7 @@
 import re
 from typing import TypedDict
 
-from style_bert_vits2.constants import Languages
+
 from style_bert_vits2.logging import logger
 from style_bert_vits2.nlp import bert_models
 from style_bert_vits2.nlp.japanese import pyopenjtalk_worker as pyopenjtalk
@@ -63,7 +63,7 @@ def g2p(
     for i in sep_text:
         if i not in PUNCTUATIONS:
             sep_tokenized.append(
-                bert_models.load_tokenizer(Languages.JP).tokenize(i)
+                bert_models.load_tokenizer().tokenize(i)
             )  # ここでおそらく`i`が文字単位に分割される
         else:
             sep_tokenized.append([i])

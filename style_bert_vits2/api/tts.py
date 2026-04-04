@@ -13,7 +13,6 @@ class Lang(StrEnum):
     """Language enum for the public API."""
 
     JA = "JP"  # Internal code uses "JP"
-    EN = "EN"
 
 
 class TTS:

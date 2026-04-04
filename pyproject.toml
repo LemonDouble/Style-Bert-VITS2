@@ -24,10 +24,6 @@ dependencies = [
     "num2words",
     "numba",
     "accelerate",
-    # NLP - English (JP-Extra에서 영어 섞인 텍스트 처리용)
-    "cmudict",
-    "g2p_en",
-    "nltk<=3.8.1",
 ]
 
 [project.urls]

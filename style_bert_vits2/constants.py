@@ -14,19 +14,9 @@ class Languages(StrEnum):
     ZH = "ZH"
 
 
-# HuggingFace repo IDs for auto-download
-BERT_REPO_IDS = {
-    Languages.JP: "ku-nlp/deberta-v2-large-japanese-char-wwm",
-    Languages.EN: "microsoft/deberta-v3-large",
-    Languages.ZH: "hfl/chinese-roberta-wwm-ext-large",
-}
-
-# Legacy local paths (used by internal bert_models.py fallback)
-DEFAULT_BERT_MODEL_PATHS = {
-    Languages.JP: BASE_DIR / "bert" / "deberta-v2-large-japanese-char-wwm",
-    Languages.EN: BASE_DIR / "bert" / "deberta-v3-large",
-    Languages.ZH: BASE_DIR / "bert" / "chinese-roberta-wwm-ext-large",
-}
+# JP BERT model
+BERT_JP_REPO = "ku-nlp/deberta-v2-large-japanese-char-wwm"
+DEFAULT_BERT_JP_PATH = BASE_DIR / "bert" / "deberta-v2-large-japanese-char-wwm"
 
 DEFAULT_USER_DICT_DIR = BASE_DIR / "dict_data"
 
