@@ -1,9 +1,35 @@
+import json
 import re
 import unicodedata
+from pathlib import Path
 
 from num2words import num2words
 
 from style_bert_vits2.nlp.symbols import PUNCTUATIONS
+
+# 英語→カタカナ外来語辞書（遅延ロード）
+_EN_TO_KATA_DICT: dict[str, str] | None = None
+_EN_WORD_PATTERN = re.compile(r"[A-Za-z]+")
+
+
+def _get_en_to_kata_dict() -> dict[str, str]:
+    global _EN_TO_KATA_DICT
+    if _EN_TO_KATA_DICT is None:
+        dict_path = Path(__file__).parent / "english_to_katakana.json"
+        with open(dict_path, "r", encoding="utf-8") as f:
+            _EN_TO_KATA_DICT = json.load(f)
+    return _EN_TO_KATA_DICT
+
+
+def _replace_english_with_katakana(text: str) -> str:
+    """英単語を外来語辞書でカタカナに置換する。辞書にない単語はそのまま残す。"""
+    d = _get_en_to_kata_dict()
+
+    def _replace(m: re.Match) -> str:
+        word = m.group()
+        return d.get(word.lower(), word)
+
+    return _EN_WORD_PATTERN.sub(_replace, text)
 
 
 # 記号類の正規化マップ
@@ -110,6 +136,7 @@ def normalize_text(text: str) -> str:
     """
 
     res = unicodedata.normalize("NFKC", text)  # ここでアルファベットは半角になる
+    res = _replace_english_with_katakana(res)  # 英単語→カタカナ外来語変換
     res = __convert_numbers_to_words(res)  # 「100円」→「百円」等
     # 「～」と「〜」と「~」も長音記号として扱う
     res = res.replace("~", "ー")

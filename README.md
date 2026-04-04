@@ -94,13 +94,26 @@ TTS (공유 리소스 — 자동 관리)
 └── speakers["plana"]  → fine-tuned 가중치만 (~240MB, 유저 제공)
 ```
 
+## 영어→카타카나 변환
+
+일본어 텍스트에 포함된 영어 단어를 자동으로 카타카나 외래어로 변환합니다.
+
+- 22만 엔트리의 외래어 사전 룩업 (의존성 없음, 순수 dict)
+- `hello` → `ハロー`, `computer` → `コンピュータ`, `meeting` → `ミーティング`
+- 사전에 없는 단어는 기존 동작 유지 (pyopenjtalk 처리)
+- 데이터 출처: [loanwords_gairaigo](https://github.com/jamesohortle/loanwords_gairaigo) (GPL-3.0)
+  - JMdict, CMUdict, Wikipedia, Wiktionary, Britfone, JTCA, LREC'14 기반
+
 ## 라이선스
 
 - 코드: AGPL-3.0 (원본 Style-Bert-VITS2)
 - 모델 가중치 (자체 학습): 별도 — 코드만 공개하면 AGPL 조건 충족
 - 사전학습 모델 (BERT, WavLM 등): 각각 MIT
+- 영어→카타카나 사전 데이터: GPL-3.0 ([loanwords_gairaigo](https://github.com/jamesohortle/loanwords_gairaigo))
+  - 원본 데이터 소스: JMdict (CC BY-SA 4.0), CMUdict (BSD), Wikipedia/Wiktionary (CC BY-SA 3.0), Britfone, JTCA, LREC'14
 
 ## Credits
 
 - [Style-Bert-VITS2](https://github.com/litagin02/Style-Bert-VITS2) by litagin02
 - [Bert-VITS2](https://github.com/fishaudio/Bert-VITS2) by Fish Audio
+- [loanwords_gairaigo](https://github.com/jamesohortle/loanwords_gairaigo) by James O'Hortle — 영어→카타카나 외래어 사전 데이터
